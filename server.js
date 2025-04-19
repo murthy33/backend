@@ -1,43 +1,19 @@
-const http=require('http');
-const getReq=require("./methods/get-request");
-const postReq=require("./methods/post-request");
-const putReq=require("./methods/put-request");
-const deleteReq=require("./methods/delete-request");
-let movies = require("./data/movies.json")
+const express = require("express");
+const errorHandler = require("./middleware/errorHandler");
+const connectDb = require("./config/dbConnection");
+const dotenv=require("dotenv").config();
 
-require("dotenv").config();
-const PORT=process.env.PORT || 5001;
+connectDb();
+const app = express();
 
-const server=http.createServer((req,res)=>{
-  req.movies=movies;
-  switch(req.method){
-    case "GET":
-      getReq(req,res);
-      break;
-    case "POST":
-      postReq(req,res);
-      break;
-    case "PUT":
-      putReq(req,res);
-      break;
-    case "DELETE":
-      deleteReq(req,res);
-      break;
-    default:
-      res.statusCode=404;
-      res.setHeader("content-type","application/json");
-      res.write(
-        JSON.stringify({title:"Not Found", message:"Route not found"})
-      )
-      res.end();
+app.use(express.json())
 
+port=process.env.PORT || 5001
 
-  }
+app.use("/api/contacts", require("./routes/contactRoutes"));
+app.use("/api/users", require("./routes/userRoutes"));
+app.use(errorHandler)
 
-    
-
-})
-
-server.listen(PORT,()=>{
-  console.log(`Server started on port:${PORT}`);
-})
+app.listen(port, () => {
+  console.log(`Server running at ${port}`);
+});
